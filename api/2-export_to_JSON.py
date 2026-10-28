@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 """Export an employee's TODO list data to a JSON file."""
+from collections import OrderedDict
 import json
 import requests
 import sys
@@ -13,9 +14,16 @@ if __name__ == "__main__":
     todos = requests.get(url + "todos", params={"userId": user_id}).json()
     username = user.get("username")
 
-    data = {user_id: [{"task": t.get("title"),
-                       "completed": t.get("completed"),
-                       "username": username} for t in todos]}
+    tasks = []
+    for t in todos:
+        entry = OrderedDict()
+        entry["task"] = t.get("title")
+        entry["completed"] = t.get("completed")
+        entry["username"] = username
+        tasks.append(entry)
+
+    data = OrderedDict()
+    data[user_id] = tasks
 
     with open("{}.json".format(user_id), "w") as json_file:
         json.dump(data, json_file)
